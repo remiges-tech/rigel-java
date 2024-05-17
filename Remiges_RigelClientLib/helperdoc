@@ -1,0 +1,78 @@
+####################################Services######################################################################################
+-- RigelService.java --
+
+1. **Package Declaration**: 
+   ```java
+   package com.remiges.rigel.service;
+   ```
+   This code belongs to the `com.remiges.rigel.service` package.
+
+2. **Imports**:
+   ```java
+   import com.google.common.collect.ArrayListMultimap;
+   import com.google.common.collect.Multimap;
+   import com.remiges.rigel.constant.RigelConstant;
+   import io.etcd.jetcd.ByteSequence;
+   import io.etcd.jetcd.Client;
+   import io.etcd.jetcd.KV;
+   import io.etcd.jetcd.options.GetOption;
+   import java.nio.charset.StandardCharsets;
+   import java.util.concurrent.ExecutionException;
+   import org.springframework.stereotype.Service;
+   ```
+   These are import statements bringing in necessary classes and packages. Notable ones include:
+   - `ArrayListMultimap` and `Multimap` from Google Guava for creating and using a Multimap data structure.
+   - `ByteSequence`, `Client`, and `KV` from etcd's Java client library for interacting with etcd key-value store.
+   - `GetOption` for specifying options when retrieving data from etcd.
+   - `StandardCharsets` for character encoding.
+   - `ExecutionException` for handling exceptions related to asynchronous execution.
+   - `@Service` annotation from Spring Framework for marking this class as a Spring service component.
+
+3. **Class Declaration**: 
+   ```java
+   @Service
+   public class RigelService {
+       // Class members and methods
+   }
+   ```
+   This is the declaration of the `RigelService` class, marked as a Spring service component.
+
+4. **Class Members**:
+   ```java
+   private Multimap<String, String> multimap = ArrayListMultimap.create();
+   private final Client client;
+   private final ByteSequence keyPrefix = ByteSequence.from(RigelConstant.ETCD_KEY_PREFIX, StandardCharsets.UTF_8);
+   ```
+   - `multimap`: An instance of `Multimap` from Guava, used to store key-value pairs retrieved from etcd.
+   - `client`: An instance of `Client` from etcd's Java client library, used for communication with the etcd server.
+   - `keyPrefix`: A byte sequence representing the key prefix used for querying etcd.
+
+5. **Constructor**:
+   ```java
+   public RigelService() {
+       // Constructor body
+   }
+   ```
+   The constructor initializes the `client` member by building a new etcd client using the server address specified in `RigelConstant.ETCD_SERVER_ADDRESS`. It then calls the `fetchDataAndStoreInMultimap()` method to fetch data from etcd and store it in the `multimap`.
+
+6. **Methods**:
+   - `putValue(String key, String value)`: Stores a key-value pair in etcd.
+   - `fetchDataAndStoreInMultimap()`: Fetches data from etcd and stores it in the `multimap`.
+   - `fetchConfigValue(String environment, String key)`: Fetches a configuration value based on the specified environment and key.
+   - `rangeEndForPrefix(ByteSequence keyPrefix)`: Helper method to compute the range end for a given key prefix.
+
+7. **Helper Method**:
+   ```java
+   private ByteSequence rangeEndForPrefix(ByteSequence keyPrefix) {
+       // Method body
+   }
+   ```
+   This is a private helper method used internally to compute the range end for a given key prefix. It's used in the `fetchDataAndStoreInMultimap()` method to specify the range of keys to fetch from etcd.
+
+8. **Annotations**:
+   ```java
+   @Service
+   ```
+   This annotation marks the class as a Spring service component, allowing it to be automatically detected and configured by Spring's component scanning mechanism.
+
+Overall, this code represents a service component responsible for interacting with etcd, fetching configuration data, and storing it in a multimap for efficient retrieval based on environment and key. It provides methods for storing new key-value pairs, fetching configuration values, and internal logic for communicating with etcd.
