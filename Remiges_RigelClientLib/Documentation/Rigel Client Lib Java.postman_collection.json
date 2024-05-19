@@ -1,0 +1,109 @@
+{
+	"info": {
+		"_postman_id": "dd2f4075-2818-4964-8ae2-1061ff08a709",
+		"name": "Rigel Client Lib Java",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "1762106"
+	},
+	"item": [
+		{
+			"name": "Fetch Values from Etcd",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/fetchConfig?version=2&appName=NDMLKRA&moduleName=KYCEnquiry&configName=config&namedConfig=uat&parameterName=paninputlimit\n",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"fetchConfig"
+					],
+					"query": [
+						{
+							"key": "version",
+							"value": "2"
+						},
+						{
+							"key": "appName",
+							"value": "NDMLKRA"
+						},
+						{
+							"key": "moduleName",
+							"value": "KYCEnquiry"
+						},
+						{
+							"key": "configName",
+							"value": "config"
+						},
+						{
+							"key": "namedConfig",
+							"value": "uat"
+						},
+						{
+							"key": "parameterName",
+							"value": "paninputlimit\n"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Put Values into Etcd",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "\"18\"",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/putConfig?version=2&appName=NDMLKRA&moduleName=KYCEnquiry&configName=config&namedConfig=uat&parameterName=paninputlimit\n",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"putConfig"
+					],
+					"query": [
+						{
+							"key": "version",
+							"value": "2"
+						},
+						{
+							"key": "appName",
+							"value": "NDMLKRA"
+						},
+						{
+							"key": "moduleName",
+							"value": "KYCEnquiry"
+						},
+						{
+							"key": "configName",
+							"value": "config"
+						},
+						{
+							"key": "namedConfig",
+							"value": "uat"
+						},
+						{
+							"key": "parameterName",
+							"value": "paninputlimit\n"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -1,134 +1,92 @@
 package com.remiges.rigel.service;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ExecutionException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.remiges.rigel.constant.RigelConstant;
+import com.remiges.rigel.dto.EtcdPrefixDTO;
 
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
 import io.etcd.jetcd.KV;
-
 import io.etcd.jetcd.options.GetOption;
-import java.nio.charset.StandardCharsets;
-
-import java.util.concurrent.ExecutionException;
-
-import org.springframework.stereotype.Service;
+import io.etcd.jetcd.options.PutOption;
 
 /**
  * Service class for interacting with Rigel configurations stored in etcd.
  */
-
-
-//String value = rigel.get(app,module,version,config,key) // constructor
 @Service
 public class RigelService {
 
-	// Multimap to store configurations
-	private Multimap<String, String> multimap = ArrayListMultimap.create();
+	private static final Logger logger = LoggerFactory.getLogger(RigelService.class);
 
-	// Etcd client
-	private final Client client;
+	private static final Client client = Client.builder().endpoints(RigelConstant.ETCD_SERVER_ADDRESS).build();
 
-	// Key prefix in etcd
-	private final ByteSequence keyPrefix = ByteSequence.from(RigelConstant.ETCD_KEY_PREFIX, StandardCharsets.UTF_8);
+	private static final EtcdPrefixDTO etcdPrefix = new EtcdPrefixDTO();
 
 	/**
-	 * Constructor to initialize the Rigel service.
-	 */
-	public RigelService() {
-		this.client = Client.builder().endpoints(RigelConstant.ETCD_SERVER_ADDRESS).build();
-		fetchDataAndStoreInMultimap(); // Fetch data from etcd and store in multimap
-	}
-
-	/**
-	 * Store a key-value pair in etcd.
+	 * Fetches a configuration value from etcd based on the provided parameters.
 	 *
-	 * @param key   The key.
-	 * @param value The value.
-	 */
-	public void putValue(String key, String value) {
-		ByteSequence keyByteSeq = ByteSequence.from(key, StandardCharsets.UTF_8);
-		ByteSequence valueByteSeq = ByteSequence.from(value, StandardCharsets.UTF_8);
-		try (Client client = Client.builder().endpoints(RigelConstant.ETCD_SERVER_ADDRESS).build()) {
-			KV kvClient = client.getKVClient();
-			kvClient.put(keyByteSeq, valueByteSeq).get();
-			System.out.println("Value '" + value + "' stored successfully for key " + key);
-		} catch (Exception e) {
-			System.out.println("Error storing value for key " + key + ": " + e);
-		}
-	}
-
-	/**
-	 * Fetch data from etcd and store in the Multimap.
-	 */
-	public void fetchDataAndStoreInMultimap() {
-		try (client) {
-			KV kvClient = client.getKVClient();
-
-			ByteSequence rangeEnd = rangeEndForPrefix(keyPrefix);
-			GetOption getOption = GetOption.newBuilder().withRange(rangeEnd).build();
-
-			kvClient.get(keyPrefix, getOption).whenComplete((getResponse, throwable) -> {
-				if (throwable != null) {
-					throwable.printStackTrace();
-					return;
-				}
-				// Clear existing Multimap before updating
-				multimap.clear();
-
-				getResponse.getKvs().forEach(keyValue -> {
-					String key = keyValue.getKey().toString(StandardCharsets.UTF_8);
-					String value = keyValue.getValue().toString(StandardCharsets.UTF_8);
-					String[] keyParts = key.split("/");
-					if (keyParts.length >= 2) {
-						String nestedKey = keyParts[keyParts.length - 1];
-						String parentKey = keyParts[keyParts.length - 2];
-						multimap.put(parentKey, nestedKey + "=" + value);
-					}
-				});
-
-				// Do something with the Multimap
-				System.out.println("Updated Multimap: " + multimap);
-			}).get();
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * Fetch a configuration value based on environment and key.
-	 *
-	 * @param environment The environment.
-	 * @param key         The key.
+	 * @param version       The version number.
+	 * @param appName       The application name.
+	 * @param moduleName    The module name.
+	 * @param configName    The configuration name.
+	 * @param namedConfig   The named configuration.
+	 * @param parameterName The parameter name.
 	 * @return The configuration value, or null if not found.
 	 */
-	public String fetchConfigValue(String environment, String key) { // version, app, module, config, key
-		if (multimap.containsKey(environment)) {
-			Iterable<String> configValues = multimap.get(environment);
-			for (String value : configValues) {
-				if (value.contains(key)) {
-					String[] parts = value.split("=");
-					if (parts.length == 2 && parts[0].equals(key)) {
-						return parts[1];
-					}
-				}
-			}
+	public static String fetchConfigValue(String version, String appName, String moduleName, String configName,
+			String namedConfig, String parameterName) {
+		ByteSequence keyPrefix = ByteSequence.from(
+				etcdPrefix.getPrefix(version, appName, moduleName, configName, namedConfig), StandardCharsets.UTF_8);
+		ByteSequence key = ByteSequence.from(
+				etcdPrefix.getKey(version, appName, moduleName, configName, namedConfig, parameterName),
+				StandardCharsets.UTF_8);
+
+		try {
+			KV kvClient = client.getKVClient();
+			GetOption getOption = GetOption.newBuilder().withPrefix(keyPrefix).build();
+			return kvClient.get(key, getOption).get().getKvs().stream().findFirst()
+					.map(kv -> kv.getValue().toString(StandardCharsets.UTF_8)).orElse(null);
+		} catch (InterruptedException | ExecutionException e) {
+			logger.error("Error fetching configuration value from etcd: {}", e.getMessage());
+			return null;
 		}
-		return null;
 	}
 
 	/**
-	 * Helper method to compute the range end for a given key prefix.
+	 * Stores a configuration value in etcd based on the provided parameters.
 	 *
-	 * @param keyPrefix The key prefix.
-	 * @return The range end ByteSequence.
+	 * @param version       The version number.
+	 * @param appName       The application name.
+	 * @param moduleName    The module name.
+	 * @param configName    The configuration name.
+	 * @param namedConfig   The named configuration.
+	 * @param parameterName The parameter name.
+	 * @param value         The value to store.
 	 */
-	private ByteSequence rangeEndForPrefix(ByteSequence keyPrefix) {
-		byte[] keyBytes = keyPrefix.getBytes();
-		byte[] rangeEnd = new byte[keyBytes.length + 1];
-		System.arraycopy(keyBytes, 0, rangeEnd, 0, keyBytes.length);
-		rangeEnd[keyBytes.length] = (byte) 0xFF;
-		return ByteSequence.from(rangeEnd);
+	public static void putValue(String version, String appName, String moduleName, String configName,
+			String namedConfig, String parameterName, String value) {
+		ByteSequence key = getKey(version, appName, moduleName, configName, namedConfig, parameterName);
+		ByteSequence val = ByteSequence.from(value, StandardCharsets.UTF_8);
+
+		try {
+			KV kvClient = client.getKVClient();
+			kvClient.put(key, val, PutOption.newBuilder().build()).get();
+			logger.info("Value '{}' stored successfully for key {}", value, key);
+		} catch (InterruptedException | ExecutionException e) {
+			logger.error("Error storing value '{}' for key {}: {}", value, key, e.getMessage());
+		}
+	}
+
+	private static ByteSequence getKey(String version, String appName, String moduleName, String configName,
+			String namedConfig, String parameterName) {
+		String keyString = String.format("/remiges/rigel/%s/%s/%s/%s/%s/%s", version, appName, moduleName, configName,
+				namedConfig, parameterName);
+		return ByteSequence.from(keyString, StandardCharsets.UTF_8);
 	}
 }
