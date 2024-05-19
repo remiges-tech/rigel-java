@@ -95,7 +95,7 @@ public class EtcdPrefixDTO {
      * @param namedConfig The named configuration.
      * @return The prefix for etcd keys.
      */
-    public String getPrefix(String version, String appName, String moduleName, String configName, String namedConfig) {
+    public String getPrefix(String appName, String moduleName, String version, String configName, String namedConfig) {
         return ETCD_KEY_PREFIX + appName + "/" + moduleName + "/" + version + "/" + configName + "/" + namedConfig + "/";
     }
 
@@ -110,8 +110,8 @@ public class EtcdPrefixDTO {
      * @param parameterName The parameter name.
      * @return The key for etcd.
      */
-    public String getKey(String version, String appName, String moduleName, String configName, String namedConfig,
+    public String getKey(String appName, String moduleName, String version, String configName, String namedConfig,
             String parameterName) {
-        return ETCD_KEY_PREFIX + getPrefix(version, appName, moduleName, configName, namedConfig) + parameterName;
+        return getPrefix(appName, moduleName, version, configName, namedConfig) + parameterName;
     }
 }

@@ -1,10 +1,14 @@
 package com.remiges.rigel.controller;
 
-import com.remiges.rigel.service.RigelService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.remiges.rigel.service.RigelService;
 
 /**
  * Controller class for handling Rigel configurations.
@@ -29,7 +33,7 @@ public class RigelController {
 	public String fetchConfigValue(@RequestParam String version, @RequestParam String appName,
 			@RequestParam String moduleName, @RequestParam String configName, @RequestParam String namedConfig,
 			@RequestParam String parameterName) {
-		return RigelService.fetchConfigValue(version, appName, moduleName, configName, namedConfig, parameterName);
+		return RigelService.fetchConfigValue(appName, moduleName, version, configName, namedConfig, parameterName);
 	}
 
 	/**
@@ -44,10 +48,11 @@ public class RigelController {
 	 * @param value         The value to store.
 	 */
 	@PutMapping("/putConfig")
-	public void putConfigValue(@RequestParam String version, @RequestParam String appName,
+	public String putConfigValue(@RequestParam String version, @RequestParam String appName,
 			@RequestParam String moduleName, @RequestParam String configName, @RequestParam String namedConfig,
 			@RequestParam String parameterName, @RequestBody String value) {
 		RigelService.putValue(version, appName, moduleName, configName, namedConfig, parameterName, value);
 		logger.info("Value '{}' stored successfully for parameter '{}'", value, parameterName);
+		return "Value added successfully";
 	}
 }

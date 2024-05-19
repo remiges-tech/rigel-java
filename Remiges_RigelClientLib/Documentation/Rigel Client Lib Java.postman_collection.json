@@ -12,7 +12,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/fetchConfig?version=2&appName=NDMLKRA&moduleName=KYCEnquiry&configName=config&namedConfig=uat&parameterName=paninputlimit\n",
+					"raw": "http://localhost:8080/fetchConfig?appName=NDMLKRA&moduleName=KYCEnquiry&version=2&configName=config&namedConfig=uat&parameterName=paninputlimit\n",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -23,16 +23,16 @@
 					],
 					"query": [
 						{
-							"key": "version",
-							"value": "2"
-						},
-						{
 							"key": "appName",
 							"value": "NDMLKRA"
 						},
 						{
 							"key": "moduleName",
 							"value": "KYCEnquiry"
+						},
+						{
+							"key": "version",
+							"value": "2"
 						},
 						{
 							"key": "configName",
@@ -58,7 +58,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "\"18\"",
+					"raw": "\"17\"",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -66,7 +66,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/putConfig?version=2&appName=NDMLKRA&moduleName=KYCEnquiry&configName=config&namedConfig=uat&parameterName=paninputlimit\n",
+					"raw": "http://localhost:8080/putConfig?appName=NDMLKRA&moduleName=KYCEnquiry&version=2&configName=config&namedConfig=uat&parameterName=paninputlimit\n",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -77,16 +77,16 @@
 					],
 					"query": [
 						{
-							"key": "version",
-							"value": "2"
-						},
-						{
 							"key": "appName",
 							"value": "NDMLKRA"
 						},
 						{
 							"key": "moduleName",
 							"value": "KYCEnquiry"
+						},
+						{
+							"key": "version",
+							"value": "2"
 						},
 						{
 							"key": "configName",
