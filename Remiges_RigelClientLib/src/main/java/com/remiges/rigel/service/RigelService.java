@@ -1,10 +1,13 @@
 package com.remiges.rigel.service;
 
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.remiges.rigel.constant.RigelConstant;
@@ -13,8 +16,10 @@ import com.remiges.rigel.dto.EtcdPrefixDTO;
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
 import io.etcd.jetcd.KV;
+import io.etcd.jetcd.Watch;
 import io.etcd.jetcd.options.GetOption;
 import io.etcd.jetcd.options.PutOption;
+import io.etcd.jetcd.watch.WatchEvent;
 
 /**
  * Service class for interacting with Rigel configurations stored in etcd.
@@ -27,6 +32,13 @@ public class RigelService {
 	private static final Client client = Client.builder().endpoints(RigelConstant.ETCD_SERVER_ADDRESS).build();
 
 	private static final EtcdPrefixDTO etcdPrefix = new EtcdPrefixDTO();
+    private final Map<String, String> configMap = new HashMap<>();
+    
+    
+    public String getConfig(String key) {
+        return configMap.get(key);
+    }
+
 
 	/**
 	 * Fetches a configuration value from etcd based on the provided parameters.
@@ -73,7 +85,6 @@ public class RigelService {
 			String namedConfig, String parameterName, String value) {
 		ByteSequence key = getKey(version, appName, moduleName, configName, namedConfig, parameterName);
 		ByteSequence val = ByteSequence.from(value, StandardCharsets.UTF_8);
-
 		try {
 			KV kvClient = client.getKVClient();
 			kvClient.put(key, val, PutOption.newBuilder().build()).get();
@@ -82,6 +93,8 @@ public class RigelService {
 			logger.error("Error storing value '{}' for key {}: {}", value, key, e.getMessage());
 		}
 	}
+	
+	
 
 	private static ByteSequence getKey(String version, String appName, String moduleName, String configName,
 			String namedConfig, String parameterName) {
