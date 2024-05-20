@@ -19,6 +19,26 @@ public class RigelController {
 	private static final Logger logger = LoggerFactory.getLogger(RigelController.class);
 
 	/**
+	 * Retrieves a configuration value from the Etcd cache based on the specified
+	 * parameters.
+	 *
+	 * @param version       The version of the configuration.
+	 * @param appName       The name of the application.
+	 * @param moduleName    The name of the module.
+	 * @param configName    The name of the configuration.
+	 * @param namedConfig   The named configuration.
+	 * @param parameterName The name of the parameter.
+	 * @return The configuration value retrieved from the Etcd cache.
+	 */
+	@GetMapping("/fetchConfigFromCache")
+	public String fetchConfigFromCache(@RequestParam String version, @RequestParam String appName,
+			@RequestParam String moduleName, @RequestParam String configName, @RequestParam String namedConfig,
+			@RequestParam String parameterName) {
+		return RigelService.fetchConfigFromEtcdCache(appName, moduleName, version, configName, namedConfig,
+				parameterName);
+	}
+
+	/**
 	 * Fetches a configuration value from etcd based on the provided parameters.
 	 *
 	 * @param version       The version number.
@@ -29,11 +49,11 @@ public class RigelController {
 	 * @param parameterName The parameter name.
 	 * @return The configuration value, or null if not found.
 	 */
-	@GetMapping("/fetchConfig")
+	@GetMapping("/fetchConfigFromEtcd")
 	public String fetchConfigValue(@RequestParam String version, @RequestParam String appName,
 			@RequestParam String moduleName, @RequestParam String configName, @RequestParam String namedConfig,
 			@RequestParam String parameterName) {
-		return RigelService.fetchConfigValue(appName, moduleName, version, configName, namedConfig, parameterName);
+		return RigelService.fetchConfigFromEtcd(appName, moduleName, version, configName, namedConfig, parameterName);
 	}
 
 	/**
