@@ -34,45 +34,8 @@ public class RigelController {
 	public String fetchConfigFromCache(@RequestParam String version, @RequestParam String appName,
 			@RequestParam String moduleName, @RequestParam String configName, @RequestParam String namedConfig,
 			@RequestParam String parameterName) {
-		return RigelService.fetchConfigFromEtcdCache(appName, moduleName, version, configName, namedConfig,
+		return RigelService.get(appName, moduleName, version, configName, namedConfig,
 				parameterName);
 	}
 
-	/**
-	 * Fetches a configuration value from etcd based on the provided parameters.
-	 *
-	 * @param version       The version number.
-	 * @param appName       The application name.
-	 * @param moduleName    The module name.
-	 * @param configName    The configuration name.
-	 * @param namedConfig   The named configuration.
-	 * @param parameterName The parameter name.
-	 * @return The configuration value, or null if not found.
-	 */
-	@GetMapping("/fetchConfigFromEtcd")
-	public String fetchConfigValue(@RequestParam String version, @RequestParam String appName,
-			@RequestParam String moduleName, @RequestParam String configName, @RequestParam String namedConfig,
-			@RequestParam String parameterName) {
-		return RigelService.fetchConfigFromEtcd(appName, moduleName, version, configName, namedConfig, parameterName);
-	}
-
-	/**
-	 * Stores a configuration value in etcd based on the provided parameters.
-	 *
-	 * @param version       The version number.
-	 * @param appName       The application name.
-	 * @param moduleName    The module name.
-	 * @param configName    The configuration name.
-	 * @param namedConfig   The named configuration.
-	 * @param parameterName The parameter name.
-	 * @param value         The value to store.
-	 */
-	@PutMapping("/putConfig")
-	public String putConfigValue(@RequestParam String version, @RequestParam String appName,
-			@RequestParam String moduleName, @RequestParam String configName, @RequestParam String namedConfig,
-			@RequestParam String parameterName, @RequestBody String value) {
-		RigelService.putValue(version, appName, moduleName, configName, namedConfig, parameterName, value);
-		logger.info("Value '{}' stored successfully for parameter '{}'", value, parameterName);
-		return "Value added successfully";
-	}
 }

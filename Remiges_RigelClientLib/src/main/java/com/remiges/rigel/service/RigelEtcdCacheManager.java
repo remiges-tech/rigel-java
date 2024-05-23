@@ -48,7 +48,7 @@ public class RigelEtcdCacheManager {
 						String value = event.getKeyValue().getValue().toString(StandardCharsets.UTF_8);
 						switch (event.getEventType()) {
 						case PUT:
-							logger.info("*PUT event received for key: {}, value: {}", key, value);
+							logger.info("PUT event received for key: {}, value: {}", key, value);
 							etcdCacheStorage.put(key, value);
 							break;
 						case DELETE:
